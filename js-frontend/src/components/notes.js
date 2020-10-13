@@ -12,6 +12,8 @@ class Notes {
         this.newNoteBody = document.getElementById('new-note-body')
         this.noteForm = document.getElementById('new-note-form')
         this.noteForm.addEventListener('submit', this.createNote.bind(this))
+        this.notesContainer.addEventListener('dblclick', this.handleNoteClick.bind(this))
+        this.notesContainer.addEventListener('blur', this.updateNote.bind(this), true)
     }
 
     createNote(e) {
@@ -25,10 +27,30 @@ class Notes {
         })
     }
 
+    handleNoteClick(e) {
+        this.toggleNote(e)
+    }
+    toggleNote(e) {
+        const li = e.target
+        li.contentEditable = true;
+        li.focus()
+        li.classList.add('editable')
+    }
+
+    updateNote(e) {
+        const li = e.target
+        li.contentEditable = false;
+        li.classList.remove('editable')
+        const newValue = li.innerHTML
+        const id = li.dataset.id
+        console.log(id)
+        this.adapter.updateNote(newValue, id)
+    }
+
     fetchAndLoadNotes() {
         this.adapter.getNotes().then(notes => {
-            notes.forEach(note => this.notes.push(new Note(note)))
-            console.log(this.notes)
+            notes.sort((a, b) => a.id - b.id).forEach(note => this.notes.push(new Note(note)))
+            //console.log(this.notes)
         })
         .then(() => {
             this.render()
